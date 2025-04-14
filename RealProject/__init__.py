@@ -35,6 +35,11 @@ def create_app(test_config=None):
     #引入blog的视图文件
     from app.blog import views as blog
     app.register_blueprint(blog.bp)
+    from app.auth import views as auth
+    app.register_blueprint(auth.bp) 
+
+
+
     # url 引入
     app.add_url_rule('/', endpoint='index', view_func=blog.index) #注册路由
     #注册数据库
