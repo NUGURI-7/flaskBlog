@@ -37,8 +37,8 @@ def create_app(test_config=None):
     app.register_blueprint(blog.bp)
     from app.auth import views as auth
     app.register_blueprint(auth.bp) 
-
-
+    from app.admin import views as admin
+    app.register_blueprint(admin.bp)
 
     # url 引入
     app.add_url_rule('/', endpoint='index', view_func=blog.index) #注册路由
