@@ -84,6 +84,7 @@
 
                 {% block main %}
                 <div class="box is-marginless is-shadowless is-radiusless">
+                    {% block box %}
                     <div class="columns is-multiline">
                         {% for post in posts %}
                         <div class="column is-4-fullhd">
@@ -129,6 +130,7 @@
                             </li>
                         </ul>
                     </nav>
+                    {% endblock box %}
                 </div>
                 {% endblock main %}
 
