@@ -24,7 +24,8 @@
                         博客分类
                     </p>
                     <ul class="menu-list">
-                        <li><a href="">分类管理</a></li>
+                        <li><a class="{% if 'category' in request.path %}is-active{% endif %}"
+                            href="{{ url_for('admin.category') }}">分类管理</a></li>
                     </ul>
                     <p class="menu-label">
                         文章管理

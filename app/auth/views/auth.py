@@ -45,7 +45,7 @@ def login():
         user = auth.User.query.filter_by(username=form.username.data).first()
         session.clear()  # 清除之前的session
         session['user_id'] = user.id
-        if redirect is not None:
+        if redirect_to is not None:
             return redirect(redirect_to)  # 登录成功跳转到之前的页面
 
         return redirect(url_for('index'))
