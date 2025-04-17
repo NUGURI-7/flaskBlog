@@ -2,8 +2,8 @@ from flask import (Blueprint, render_template, request, redirect,
                     url_for, flash, session)
 
 from app.auth.views.auth import login_required
-from app.blog.models import Category
-from app.admin.forms import CategoryCreateForm
+from app.blog.models import Category, Post, Tag
+from app.admin.forms import CategoryCreateForm, PostForm
 from RealProject import db
 
 
@@ -71,8 +71,89 @@ def category_del(cate_id):
     cate = Category.query.get(cate_id)
     if cate:
         # 级联删除
-        # Post.query.filter(Post.category_id==cate.id).delete()
+        Post.query.filter(Post.category_id==cate.id).delete()
         db.session.delete(cate)
         db.session.commit()
         flash(f'{cate.name}分类删除成功')
         return redirect(url_for('admin.category'))
+    
+
+#查看文章列表视图
+@bp.route('/article')
+@login_required
+def article():
+    # 查看文章列表
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(-Post.add_date).paginate(
+        page=page, per_page=2, error_out=False)
+    post_list = pagination.items
+    return render_template('admin/article.html', 
+                           post_list=post_list, pagination=pagination)    
+
+
+#添加文章视图
+@bp.route('/article/add', methods=['GET', 'POST'])
+@login_required
+def article_add():
+    # 新增博客分类
+    form = PostForm()
+    form.category_id.choices = [(v.id,v.name) for v in Category.query.all()]
+    form.tags.choices = [(v.id,v.name) for v in Tag.query.all()]
+
+    if form.validate_on_submit():
+        post = Post(
+            title=form.title.data, 
+            desc=form.desc.data, 
+            has_type=form.has_type.data, 
+            category_id=int(form.category_id.data),  #一对多保存
+            content=form.content.data,
+        )
+        post.tags = [Tag.query.get(tag_id) for tag_id in form.tags.data] #多对多保存
+        db.session.add(post)
+        db.session.commit()
+        flash(f'{form.title.data}文章添加成功')
+        return redirect(url_for('admin.article'))
+    return render_template('admin/article_form.html', form=form)
+
+
+#编辑文章视图
+@bp.route('/article/edit/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def article_edit(post_id):
+    # 回显数据
+    post = Post.query.get(post_id)
+    tags = [tag.id for tag in post.tags]  # 获取当前文章的标签ID
+    form = PostForm(
+        title=post.title, 
+        desc=post.desc, 
+        has_type=post.has_type.value, 
+        category_id=post.category_id, 
+        content=post.content,
+        tags=tags,  
+    )
+    form.category_id.choices = [(v.id,v.name) for v in Category.query.all()]
+    form.tags.choices = [(v.id,v.name) for v in Tag.query.all()]
+    #修改数据
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.desc = form.desc.data
+        post.has_type = form.has_type.data
+        post.category_id=int(form.category_id.data)
+        post.content = form.content.data
+        post.tags = [Tag.query.get(tag_id) for tag_id in form.tags.data]
+        db.session.add(post)
+        db.session.commit()
+        flash(f'{form.title.data}文章修改成功')
+        return redirect(url_for('admin.article'))
+    return render_template('admin/article_form.html', form=form)
+
+# 删除文章视图
+@bp.route('/article/delete/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def article_del(post_id):
+    post = Post.query.get(post_id)
+    if post:
+        db.session.delete(post)
+        db.session.commit()
+        flash(f'{post.title}文章删除成功')
+        return redirect(url_for('admin.article'))

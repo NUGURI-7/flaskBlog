@@ -50,7 +50,7 @@ class Post(BaseModel):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)  # 分类ID
     #多对多关系
     tags = db.relationship('Tag', secondary=tags, 
-                           backref=db.backref('posts', lazy=True),
+                           backref=db.backref('post', lazy=True),
                              lazy='subquery')  # 标签ID
 
     def __repr__(self):

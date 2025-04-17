@@ -31,7 +31,8 @@
                         文章管理
                     </p>
                     <ul class="menu-list">
-                        <li><a href="">文章管理</a></li>
+                        <li><a class="{% if 'article' in request.path %}is-active{% endif %}"
+                            href="{{ url_for('admin.article') }}">文章管理</a></li>
                     </ul>
                     <p class="menu-label">
                         用户管理
