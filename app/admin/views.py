@@ -3,7 +3,7 @@ from flask import (Blueprint, render_template, request, redirect,
 
 from app.auth.views.auth import login_required
 from app.blog.models import Category, Post, Tag
-from app.admin.forms import CategoryCreateForm, PostForm
+from app.admin.forms import CategoryCreateForm, PostForm, TagForm
 from RealProject import db
 
 
@@ -157,3 +157,58 @@ def article_del(post_id):
         db.session.commit()
         flash(f'{post.title}文章删除成功')
         return redirect(url_for('admin.article'))
+    
+
+# 标签列表视图
+@bp.route('/tag')
+@login_required
+def tag():
+    # 查看标签列表
+    page = request.args.get('page', 1, type=int)
+    pagination = Tag.query.order_by(-Tag.add_date).paginate(
+        page=page, per_page=2, error_out=False)
+    return render_template('admin/tag.html',
+                           tag_list=pagination.items, 
+                           pagination=pagination)
+ 
+# 添加标签视图
+@bp.route('/tag/add', methods=['GET', 'POST'])
+@login_required
+def tag_add():
+    # 新增标签
+    form = TagForm()
+    if form.validate_on_submit():
+        tag = Tag(name=form.name.data)
+        db.session.add(tag)
+        db.session.commit()
+        flash(f'{form.name.data}添加成功')
+        return redirect(url_for('admin.tag'))
+    return render_template('admin/tag_form.html', form=form)
+
+# 编辑标签视图
+@bp.route('/tag/edit/<int:tag_id>', methods=['GET', 'POST'])
+@login_required
+def tag_edit(tag_id):
+    # 编辑标签
+    tag = Tag.query.get(tag_id)
+    form = TagForm(name=tag.name)
+    if form.validate_on_submit():
+        tag.name = form.name.data
+        db.session.add(tag)
+        db.session.commit()
+        flash(f'{form.name.data}修改成功')
+        return redirect(url_for('admin.tag'))
+    return render_template('admin/tag_form.html', form=form)
+
+# 删除标签视图
+@bp.route('/tag/delete/<int:tag_id>', methods=['GET', 'POST'])
+@login_required
+def tag_del(tag_id):
+    # 删除标签
+    tag = Tag.query.get(tag_id)
+    if tag:
+        db.session.delete(tag)
+        db.session.commit()
+        flash(f'{tag.name}删除成功')
+        return redirect(url_for('admin.tag'))
+
