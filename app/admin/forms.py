@@ -41,3 +41,11 @@ class PostForm(FlaskForm):
         validators=[DataRequired(message="不能为空")]
     )
     tags = SelectMultipleField('文章标签', choices=None, coerce=int)
+
+
+class TagForm(FlaskForm):
+    # 标签表单
+    name = StringField('标签名称', validators=[
+        DataRequired(message="不能为空"), 
+        Length(max=128, message="不符合字数要求！")
+    ])    
