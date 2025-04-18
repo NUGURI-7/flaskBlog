@@ -1,9 +1,10 @@
 from flask import (Blueprint, render_template, request, redirect,
                     url_for, flash, session)
-
+from werkzeug.security import generate_password_hash
 from app.auth.views.auth import login_required
 from app.blog.models import Category, Post, Tag
-from app.admin.forms import CategoryCreateForm, PostForm, TagForm
+from app.auth.models import User
+from app.admin.forms import CategoryCreateForm, PostForm, TagForm, CreateUserForm
 from RealProject import db
 
 
@@ -211,4 +212,42 @@ def tag_del(tag_id):
         db.session.commit()
         flash(f'{tag.name}删除成功')
         return redirect(url_for('admin.tag'))
+    
+# 创建用户列表视图
+@bp.route('/user')
+@login_required
+def user():
+    # 查看用户列表
+    page = request.args.get('page', 1, type=int)
+    pagination = User.query.order_by(-User.add_date).paginate(
+        page=page, per_page=2, error_out=False)
+    return render_template('admin/user.html',
+                           user_list=pagination.items, 
+                           pagination=pagination)    
+
+#创建添加用户视图
+@bp.route('/user/add', methods=['GET', 'POST'])
+@login_required
+def user_add():
+    form = CreateUserForm()
+    # 回显数据
+    if form.validate_on_submit():
+        from .utils import upload_file_path
+        f = form.avatar.data
+        avatar_path, filename = upload_file_path(f, 'avatar') #多重赋值
+        f.save(avatar_path)
+        user = User(
+            username=form.username.data, 
+            password=generate_password_hash(form.password.data),
+            avatar=f'avatar/{filename}',
+            is_super_user=form.is_super_user.data,
+            is_active=form.is_active.data,
+            is_staff=form.is_staff.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        flash(f'{form.username.data}添加成功')
+        return redirect(url_for('admin.user'))
+
+    return render_template('admin/user_form.html', form=form)
 
