@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %} NuguriDeBlog {% endblock title %}</title>
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/buefy.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/materialdesignicons.min.css') }}">
@@ -32,7 +32,9 @@
                             </b-navbar-item>
 
                             {% for cate in categories %}
-                            <b-navbar-item href="#">
+                            <b-navbar-item 
+                                {% if cate.id == cate_id %} class="has-text-primary" {% endif %}  
+                                href="{{ url_for('blog.category', cate_id=cate.id) }}">
                                 {{ cate.name }}
                             </b-navbar-item>
                             {% endfor %}
@@ -94,7 +96,7 @@
                                 <div class="card-content">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p class="title is-4"><a href="">{{ post.title }}</a> </p>
+                                            <p class="title is-4"><a href="{{ url_for('blog.detail', cate_id=post.category.id, post_id=post.id) }}">{{ post.title }}</a> </p>
                                         </div>
                                     </div>
 
