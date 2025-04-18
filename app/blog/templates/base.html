@@ -27,20 +27,15 @@
                             </b-navbar-item>
                         </template>
                         <template #start>
-                            <b-navbar-item href="#">
-                                Home
+                            <b-navbar-item href="/">
+                                首页
                             </b-navbar-item>
+
+                            {% for cate in categories %}
                             <b-navbar-item href="#">
-                                Documentation
+                                {{ cate.name }}
                             </b-navbar-item>
-                            <b-navbar-dropdown label="Info">
-                                <b-navbar-item href="#">
-                                    About
-                                </b-navbar-item>
-                                <b-navbar-item href="#">
-                                    Contact
-                                </b-navbar-item>
-                            </b-navbar-dropdown>
+                            {% endfor %}
                         </template>
 
                         <template #end>
@@ -92,23 +87,22 @@
                             <div class="card">
                                 <div class="card-image">
                                     <figure class="image is-4by3">
-                                        <img src="https://bulma.io/images/placeholders/1280x960.png"
+                                        <img src="{{ post.img }}"
                                             alt="Placeholder image">
                                     </figure>
                                 </div>
                                 <div class="card-content">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p class="title is-4"><a href="">Flask博客实战 - 掌握增删改查</a> </p>
+                                            <p class="title is-4"><a href="">{{ post.title }}</a> </p>
                                         </div>
                                     </div>
 
                                     <div class="content">
                                         <p class=" has-text-grey is-size-7">
-                                            既然我们选择了使用ORM框架，那就必须熟练掌握其提供的增删改查方法，在正式编写视图事前，
-                                            本节内容我们先在shell环境中来了解和熟悉其增删改查的基础方法！
+                                            {{ post.desc }}
                                         </p>
-                                        <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+                                        <time datetime="post.add_date">{{ post.add_date }}</time>
                                     </div>
                                 </div>
                             </div>
@@ -116,19 +110,30 @@
                         {% endfor %}
                     </div>
 
-                    <nav class="pagination" role="navigation" aria-label="pagination">
-                        <a class="pagination-previous is-disabled" title="This is the first page">Previous</a>
-                        <a class="pagination-next">Next page</a>
-                        <ul class="pagination-list">
-                            <li>
-                                <a class="pagination-link is-current" aria-label="Page 1" aria-current="page">1</a>
-                            </li>
-                            <li>
-                                <a class="pagination-link" aria-label="Goto page 2">2</a>
-                            </li>
-                            <li>
-                                <a class="pagination-link" aria-label="Goto page 3">3</a>
-                            </li>
+                    <nav class="pagination is-small" role="navigation" aria-label="pagination">
+                        {% if pagination.has_prev %}
+                        <a href="?page={{ pagination.prev_num }}" class="pagination-previous" title="This is the first page">Previous</a>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                        <a href="?page={{ pagination.next_num }}" class="pagination-next">Next page</a>
+                        {% endif %}
+                    
+                        <ul class="pagination-list">        
+                            {% for page in pagination.iter_pages() %}
+                                {% if page %} 
+                                    {% if page != pagination.page %}
+                                    <li>
+                                        <a href="?page={{ page }}" class="pagination-link" aria-label="Page 1" aria-current="page">{{ page }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li>
+                                        <a class="pagination-link is-current" aria-label="Page 1" aria-current="page">{{ page }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                    <span class=pagination-ellipsis>&hellip;</span>
+                                {% endif %}
+                            {% endfor %}
                         </ul>
                     </nav>
                     {% endblock box %}

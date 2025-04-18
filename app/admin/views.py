@@ -302,3 +302,4 @@ def user_del(user_id):
         flash(f'{user.username}删除成功')
         return redirect(url_for('admin.user'))
 
+
