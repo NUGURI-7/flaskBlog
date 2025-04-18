@@ -101,13 +101,13 @@
                 <td>{{ user.add_date }}</td>
                 <td>
                     <div class="tags">
-                        <a href="" class="tag is-success is-light">
+                        <a href="{{ url_for('admin.user_edit', user_id=user.id) }}" class="tag is-success is-light">
                             <span class="icon">
                                 <i class="mdi mdi-square-edit-outline"></i>
                             </span>
                             编辑
                         </a>
-                        <a href="" class="tag is-danger is-light">
+                        <a href="{{ url_for('admin.user_del', user_id=user.id) }}" class="tag is-danger is-light">
                             <span class="icon">
                                 <i class="mdi mdi-trash-can-outline"></i>
                             </span>

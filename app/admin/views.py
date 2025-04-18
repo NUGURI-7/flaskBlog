@@ -234,7 +234,7 @@ def user_add():
     if form.validate_on_submit():
         from .utils import upload_file_path
         f = form.avatar.data
-        avatar_path, filename = upload_file_path(f, 'avatar') #多重赋值
+        avatar_path, filename = upload_file_path('avatar', f) #多重赋值
         f.save(avatar_path)
         user = User(
             username=form.username.data, 
@@ -250,4 +250,55 @@ def user_add():
         return redirect(url_for('admin.user'))
 
     return render_template('admin/user_form.html', form=form)
+
+#创建编辑用户视图
+@bp.route('/user/edit/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def user_edit(user_id):
+    # 修改用户信息
+    user = User.query.get(user_id)
+
+    from .utils import upload_file_path
+    form = CreateUserForm(
+        username=user.username, 
+        password=user.password,
+        avatar=user.avatar,
+        is_super_user=user.is_super_user,
+        is_active=user.is_active,
+        is_staff=user.is_staff 
+    )
+    form.password.default = f'{user.password}'
+
+    if form.validate_on_submit():
+        user.username = form.username.data
+        if not form.password.data:
+            user.password = user.password
+        else:
+            user.password = generate_password_hash(form.password.data)
+        f = form.avatar.data
+        if user.avatar == f:
+            user.avatar = user.avatar
+        else:
+            avatar_path, filename = upload_file_path('avatar', f)
+            f.save(avatar_path)
+            user.avatar = f'avatar/{filename}'
+        user.is_super_user = form.is_super_user.data
+        user.is_active = form.is_active.data
+        user.is_staff = form.is_staff.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('admin.user'))
+    return render_template('admin/user_form.html', form=form, user=user)
+
+# 删除用户视图
+@bp.route('/user/del/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def user_del(user_id):
+    # 删除标签
+    user = User.query.get(user_id)
+    if tag:
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'{user.username}删除成功')
+        return redirect(url_for('admin.user'))
 

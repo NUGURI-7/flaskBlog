@@ -18,7 +18,7 @@ def update_filename(f):
     return ''.join(names) #返回文件名
 
 
-def upload_file_path(f, directory_name):
+def upload_file_path(directory_name, f):
     #处理过的图片保存路径
     file_path = _file_path(directory_name)
     filename = update_filename(f)
