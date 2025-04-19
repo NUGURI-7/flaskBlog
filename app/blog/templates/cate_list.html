@@ -65,7 +65,32 @@
         {% endblock cate_box %}
     </div>
     <div class="column">
-        asdas
+        <div class="box is-shadowless" style="border:solid 1px #eee ;">
+            <h1 class="is-size-6 icon-text">
+                <span class="icon"><i class="mdi mdi-calendar-month-outline"></i></span>
+                归档
+            </h1>
+            <div class=" dropdown-divider"></div>
+            <ul>
+                {% for date in dates %}
+                <li class="pl-2"><a href="{{ url_for('blog.archive', date=date) }}">{{ date }}</a></li>
+                <div class="dropdown-divider"></div>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="box is-shadowless" style="border:solid 1px #eee ;">
+            <h1 class="is-size-6 icon-text">
+                <span class="icon"><i class="mdi mdi-tag-multiple-outline"></i></span>
+                标签
+            </h1>
+            <div class=" dropdown-divider"></div>
+                <div class="tags">
+                    {% for tag in tags %}
+                    <a class="tag {{ tag.style|random() }}" href="{{ url_for('blog.tags', tag_id=tag.id) }}">{{ tag.name }}</a>
+                    {% endfor %}
+                </div> 
+        </div>
     </div>
 </div>
 {% endblock box %}

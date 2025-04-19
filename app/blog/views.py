@@ -58,4 +58,55 @@ def detail(cate_id, post_id):
     prev_post = Post.query.filter(Post.id < post.id).order_by(-Post.id).first() 
     #下一篇
     next_post = Post.query.filter(Post.id > post.id).order_by(Post.id).first()
-    return render_template('detail.html', cate=cate, post=post,prev_post=prev_post, next_post=next_post)                            
+    return render_template('detail.html', cate=cate, post=post,prev_post=prev_post, next_post=next_post)   
+
+#文章归档日期注入上下文
+@bp.context_processor
+def inject_archive():
+    """
+    上下文处理器函数，注入归档日期
+    """
+    #文章归档日期注入上下文
+    posts = Post.query.order_by(Post.add_date)
+    dates = set([post.add_date.strftime("%Y年%m月")for post in posts])
+    print(dates)
+    #标签
+    tags = Tag.query.all()
+    for tag in tags:
+        tag.style = ['is-success', 'is-black', 'is-light', 
+                     'is-danger','is-info', 'is-primary', 'is-warning', 
+                     'is-link']
+        
+
+    return dict(dates=dates, tags=tags)    
+
+#实现文章归档详情视图
+@bp.route('/category/<string:date>')
+def archive(date):
+    """
+    博客文章归档视图函数
+    """
+    #归档页
+    import re
+    #正则匹配年月
+    regex = re.compile(r'\d{4}|\d{2}')
+    dates = regex.findall(date)
+
+    from sqlalchemy import extract,and_,or_
+    page = request.args.get('page', 1, type=int)
+    # 根据年月获取数据
+    archive_posts = Post.query.filter(
+        and_(extract('year', Post.add_date) == int(dates[0]), 
+             extract('month', Post.add_date) == int(dates[1])))
+
+    # 对数据进行分页
+    pagination = archive_posts.paginate(page=page, per_page=2, error_out=False)
+    return render_template('archive.html', post_list=pagination.items, 
+                           pagination=pagination, date=date)
+
+#实现标签页
+@bp.route('/tags/<int:tag_id>')
+def tags(tag_id):
+    # 标签页
+    tag = Tag.query.get(tag_id)
+    return render_template('tags.html', post_list=tag.post, tag=tag)                           
