@@ -67,7 +67,7 @@ def inject_archive():
     上下文处理器函数，注入归档日期
     """
     #文章归档日期注入上下文
-    posts = Post.query.order_by(Post.add_date)
+    posts = Post.query.order_by(-Post.add_date)
     dates = set([post.add_date.strftime("%Y年%m月")for post in posts])
     print(dates)
     #标签
@@ -76,9 +76,10 @@ def inject_archive():
         tag.style = ['is-success', 'is-black', 'is-light', 
                      'is-danger','is-info', 'is-primary', 'is-warning', 
                      'is-link']
-        
+    #最新文章
+    new_posts = posts.limit(3)
 
-    return dict(dates=dates, tags=tags)    
+    return dict(dates=dates, tags=tags,new_posts=new_posts)    
 
 #实现文章归档详情视图
 @bp.route('/category/<string:date>')
@@ -109,4 +110,14 @@ def archive(date):
 def tags(tag_id):
     # 标签页
     tag = Tag.query.get(tag_id)
-    return render_template('tags.html', post_list=tag.post, tag=tag)                           
+    return render_template('tags.html', post_list=tag.post, tag=tag)        
+
+#实现搜索功能
+@bp.route('/search')
+def search():
+    # 搜索功能
+    words = request.args.get('words', type=str, default='')
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.filter(Post.title.like("%"+words+"%")).paginate(page=page, per_page=2, error_out=False)                   
+    post_list = pagination.items
+    return render_template('search.html', post_list=post_list, pagination=pagination, words=words)
