@@ -15,11 +15,26 @@ bp = Blueprint('auth', __name__, url_prefix='/auth',
 @bp.before_app_request
 def load_logged_in_user():
     # 在每个请求之前都回去session中查看userID来获取用户
+
+    #注册用户即非管理员用户允许登陆后查看的url
+    urls = ['/auth/']
+
+
+
     user_id = session.get('user_id')
     if user_id is None:
         g.user = None
     else:
-        g.user = auth.User.query.get(user_id)
+        g.user = auth.User.query.get(int(user_id))
+
+        # 权限判断
+        if g.user.is_super_user and g.user.is_active:
+            g.user.has_perm = 1
+        elif not g.user.is_super_user and g.user.is_active and not g.user.is_staff and request.path  in urls:
+            g.user.has_perm = 1
+        else:
+            g.user.has_perm = 0         
+        
 
 def login_required(view):
     # 装饰器函数，检查用户是否登录
@@ -27,8 +42,13 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            redirect_to = f"{url_for('auth.login')}?redirect={request.path}"
+            redirect_to = f"{url_for('auth.login')}?redirect_to={request.path}"
             return redirect(redirect_to)
+        # 登录成功后对权限进行判断处理
+        if g.user.has_perm:
+            pass
+        else:
+            return '<h1>没有权限访问该页面！</h1>'
         # 如果用户已经登录，则继续执行视图函数
         return view(**kwargs)
     return wrapped_view
@@ -70,4 +90,10 @@ def logout():
     session.clear()  # 清除session注销
     return redirect(url_for('index'))
 
+
+@bp.route('/')
+@login_required
+def userinfo():
+    # 用户个人中心
+    return render_template('userinfo.html')
 

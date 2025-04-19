@@ -11,6 +11,7 @@
     <div class="column is-2">
         <div class="card is-shadowless" style="border-right:solid 1px #eee">
             <div class="card-content">
+                {% block menus %}
                 <aside class="menu">
                     <p class="menu-label">
                         仪表板
@@ -46,6 +47,7 @@
                         <li><a>修改密码</a></li>
                     </ul>
                 </aside>
+                {% endblock menus %}
             </div>
         </div>
     </div>
