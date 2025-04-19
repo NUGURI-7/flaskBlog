@@ -303,3 +303,30 @@ def user_del(user_id):
         return redirect(url_for('admin.user'))
 
 
+# 后端图片上传接口
+@bp.route('/upload', methods=['POST'])
+@login_required
+def upload():
+    # 上传图片接口
+    if request.method == 'POST':
+        #获取一个文件类型 request.files
+        f = request.files.get('upload') #前端定义的upload
+        file_size = len(f.read())
+        f.seek(0) # 重置文件指针到开头
+
+        if file_size > 2 * 1024 * 1024:
+            return {'code': 'error', 
+                    'message': '文件过大，不能超过2MB'
+                    }
+        from .utils import upload_file_path
+        upload_path, filename  = upload_file_path('upload', f)
+        f.save(upload_path)
+        return {'code': 'success', 
+                'message': '上传成功',
+                'url': f'/admin/static/upload/{filename}'
+                }
+
+
+
+
+        file_path, filename = upload_file_path('upload', f)

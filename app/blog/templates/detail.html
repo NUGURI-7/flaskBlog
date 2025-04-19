@@ -24,7 +24,7 @@
         <span class="icon"><i class="mdi mdi-shape-outline"></i></span>{{ post.category.name }}
         <span class="icon"><i class="mdi mdi-tag-heart-outline"></i></span>{{ post.tags|join(',') }}
     </p>
-    <div class="content has-text-grey mt-1">{{ post.content|safe }}</div>
+    <div class="content has-text-grey mt-1">{{ post.content|safe }}</div>  <!-- 使用safe过滤器来渲染HTML内容 -->
 </div>
 
 <hr>
